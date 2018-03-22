@@ -1,0 +1,2 @@
+python seizeNE.py
+pause

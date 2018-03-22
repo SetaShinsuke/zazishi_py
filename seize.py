@@ -1,10 +1,11 @@
 # -*- coding: GBK -*-
-import requests
-import urllib
 import getpass
 import os
-from datetime import datetime
 import subprocess
+import urllib
+from datetime import datetime
+
+import requests
 
 # http://app130.zazhimi.net/api/index.php?t=1&p=1&s=36&sign=b8d01a3ceb2fa6f7eae492f7967b9225
 # http://120.26.56.13/api/show.php?a=12065&sign=c25b53c0874fc756819fd8ebb1aa30b2
@@ -41,7 +42,7 @@ if not os.path.exists(dir_path):
 img_urls = map(filter_img, jsonResult['content'])
 total = len(img_urls)
 downloaded = 0
-max = 0
+max = total
 for img_url in img_urls:
     if downloaded >= max:
         break
