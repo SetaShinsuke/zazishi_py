@@ -16,17 +16,21 @@ api_url = HOST_NET_EASE + API_PLAYLIST_DETAIL
 id = raw_input("请输入歌单 id: ")
 kwargs = {'id': id, 'type': 'playlist'}
 headers = {
+    'method': "GET",
+    'authority': 'api.imjad.cn',
+    'upgrade-insecure-requests': '1',
+    'scheme': 'https',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     'Accept-Encoding': 'gzip, deflate',
     'Accept-Language': 'zh-CN,zh;q=0.9',
     'Cache-Control': 'max-age=0',
     'Connection': 'keep-alive',
-    'Host': 'music.163.com',
+    'Host': 'api.imjad.cn',
     'Upgrade-Insecure-Requests': '1',
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}
 print "Start request..."
-# request = requests.get(api_url, kwargs, headers=headers)
-request = requests.get(api_url, kwargs)
+request = requests.get(api_url, kwargs, headers=headers)
+# request = requests.get(api_url, kwargs)
 print "Request : %s" % request.url
 print "Request complete, %s" % request
 jsonResult = request.json()
@@ -62,6 +66,7 @@ for img_bean in img_beans:
     file_name = img_bean['name']
     file_url = img_bean['url']
     print "Downloading {}/{} : {}".format(downloaded + 1, total, file_name)
+    print "Url: {}".format(file_url)
     urllib.urlretrieve(file_url, "{}\{}".format(dir_path, file_name))
     downloaded += 1
 print "下载完成{}/{}!\n已保存在\{}".format(total, downloaded, dir_path)
