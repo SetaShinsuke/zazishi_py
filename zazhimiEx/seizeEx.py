@@ -30,7 +30,7 @@ for index, magazine in enumerate(result_magazines):
     print "{}. {}-{}".format(index, magazine['magName'].encode('gbk', 'ignore'),
                              magazine['magId'])
 
-index_str = raw_input("要下载的序号: ").isdigit()
+index_str = raw_input("要下载的序号: ")
 index = int(index_str)
 mag_id = result_magazines[index]['magId']
 print "要下载的杂志: {}".format(mag_id)
@@ -63,7 +63,7 @@ if not os.path.exists(dir_path):
 img_urls = map(filter_img, detail_json['content'])
 total = len(img_urls)
 downloaded = 0
-max = 30
+max = total
 for img_url in img_urls:
     if downloaded >= max:
         break
