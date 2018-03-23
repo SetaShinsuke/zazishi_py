@@ -1,23 +1,41 @@
-# -*- coding: GBK -*-
+# -*- coding: utf-8 -*-
+import locale
 import os
 import subprocess
+import sys
 import urllib
 from datetime import datetime
 
 import requests
 
-# ËÑË÷ GET: https://app160501.zazhimi.net/api/search.php?k=men
-# ÏêÇé POST: https://app160501.zazhimi.net/api/show.php HTTP/1.1
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+# æœç´¢ GET: https://app160501.zazhimi.net/api/search.php?k=men
+# è¯¦æƒ… POST: https://app160501.zazhimi.net/api/show.php HTTP/1.1
 
 HOST = "https://app160501.zazhimi.net/"
 API_INDEX = "/api/index.php"
 API_SEARCH = "/api/search.php"
 API_SHOW = "/api/show.php"
 
-# region ËÑË÷ÒªÏÂÔØµÄÔÓÖ¾
+
+def r_in(hint):
+    return raw_input(hint.encode(sys.stdin.encoding))
+
+
+def r_out(content):
+    return content.encode(sys.stdout.encoding)
+
+
+def r_print(content):
+    print r_out(content)
+
+
+# region æœç´¢è¦ä¸‹è½½çš„æ‚å¿—
 search_url = HOST + API_SEARCH
 api_url = HOST + API_SHOW
-id = raw_input("ËÑË÷¹Ø¼ü´Ê: ")
+id = r_in("æœç´¢å…³é”®è¯: ")
 search_args = {'k': id}
 print "Start request..."
 request_search = requests.get(search_url, search_args)
@@ -27,24 +45,24 @@ print "Search complete, %s" % request_search
 search_result = request_search.json()
 result_magazines = search_result['magazine']
 for index, magazine in enumerate(result_magazines):
-    print "{}. {}-{}".format(index, magazine['magName'].encode('gbk', 'ignore'),
-                             magazine['magId'])
+    r_print("{}. {}-{}".format(index, magazine['magName'], magazine['magId']))
 
-index_str = raw_input("ÒªÏÂÔØµÄĞòºÅ: ")
+index_str = r_in("è¦ä¸‹è½½çš„åºå·: ")
 index = int(index_str)
 mag_id = result_magazines[index]['magId']
-print "ÒªÏÂÔØµÄÔÓÖ¾: {}".format(mag_id)
+# ä»æœåŠ¡å™¨æ‹¿åˆ°çš„ utf8 æ•°æ®, è§£ç  decode åä½¿ç”¨
+mag_name = result_magazines[index]['magName'].decode('utf8', 'ignore').replace('\\', '_').replace('/', '_')
+r_print("è¦ä¸‹è½½çš„æ‚å¿—: {}".format(mag_id))
 
 # endregion
 
-# region À­È¡Í¼Æ¬ĞÅÏ¢
+# region æ‹‰å–å›¾ç‰‡ä¿¡æ¯
 detail_url = HOST + API_SHOW
 detail_args = {'a': mag_id}
 print "Start request..."
 request_show = requests.get(detail_url, detail_args)
 
 print "Search Request : %s" % request_show.url
-print "Search complete, %s" % request_show
 detail_json = request_show.json()
 
 
@@ -55,8 +73,8 @@ def filter_img(item):
     return item['magPic']
 
 
-# µ±Ç°Ä¿Â¼ÖĞÏÂÔØ
-dir_path = "download\{}_{}".format(id, datetime.now().microsecond)
+# å½“å‰ç›®å½•ä¸­ä¸‹è½½
+dir_path = u"download\{}_{}".format(mag_name, datetime.now().microsecond)
 if not os.path.exists(dir_path):
     os.makedirs(dir_path)
 
@@ -67,10 +85,27 @@ max = total
 for img_url in img_urls:
     if downloaded >= max:
         break
-    file_name = img_url.split('/')[-1].encode('gbk', 'ignore').replace('\\', '_').replace('/', '_')
-    print "Downloading {}/{} : {}".format(downloaded + 1, total, file_name)
-    urllib.urlretrieve(img_url, "{}\{}".format(dir_path, file_name))
+    file_name = img_url.split('/')[-1].replace('\\', '_').replace('/', '_')
+    # file_name = img_url.split('/')[-1].encode('gbk', 'ignore').replace('\\', '_').replace('/', '_')
+    r_print("Downloading {}/{} : {}".format(downloaded + 1, total, file_name))
+    final_url = img_url.encode('utf8')
+
+    # p = urlparse.urlparse(img_url)
+    # # final_url = "{}://{}/{}?{}".format(p.scheme, p.hostname,
+    # #                                    urllib.quote_plus(p.path.encode('gbk')).replace('%2F', '/'), p.params)
+    # print type(p.path)
+    # print urllib.urlencode(str(p.path.decode('GBK')))
+    # final_url = "{}://{}/{}?{}".format(p.scheme, p.hostname, urllib.urlencode(p.path), p.params)
+    # r_print(u"file_url: {}".format(final_url))
+    # r_print(u"file_name: {}\{}".format(dir_path, file_name))
+    # urllib.urlretrieve(u"{}".format(final_url), u"{}\{}".format(dir_path, file_name))
+
+    # resp = requests.get(final_url)
+    # print resp
+
+    urllib.urlretrieve(final_url, u"{}\{}".format(dir_path, file_name))
     downloaded += 1
-print "ÏÂÔØÍê³É{}/{}!\nÒÑ±£´æÔÚ\{}".format(downloaded, total, dir_path)
+r_print(u"ä¸‹è½½å®Œæˆ{}/{}!\nå·²ä¿å­˜åœ¨\{}".format(downloaded, total, dir_path))
 to_open_path = "{}\{}".format(os.getcwd(), dir_path)
-subprocess.Popen(r'explorer /select, {}'.format(to_open_path))
+r_print("æ‰“å¼€:{}".format(to_open_path))
+subprocess.Popen(u'explorer /select, {}'.format(to_open_path).encode(locale.getpreferredencoding()), shell=True)
