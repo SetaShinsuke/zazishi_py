@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import locale
 import os
+import re
 import subprocess
 import sys
 import urllib
@@ -31,6 +32,12 @@ def r_out(content):
 def r_print(content):
     print r_out(content)
 
+
+def slugify(value):
+    import unicodedata
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
+    value = unicode(re.sub('[^\w\s-]', '', value).strip().lower())
+    value = unicode(re.sub('[-\s]+', '-', value))
 
 # region 搜索要下载的杂志
 search_url = HOST + API_SEARCH

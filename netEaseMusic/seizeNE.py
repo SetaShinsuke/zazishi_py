@@ -1,19 +1,51 @@
-# -*- coding: GBK -*-
+# -*- coding: utf-8 -*-
 import os
+import re
 import subprocess
+import sys
 import urllib
 from datetime import datetime
 
 import requests
 
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 # http://music.163.com/api/v3/playlist/detail?id=512808550
+
+
+def r_in(hint):
+    return raw_input(hint.encode(sys.stdin.encoding))
+
+
+def r_out(content):
+    return content.encode(sys.stdout.encoding)
+
+
+def r_print(content):
+    print r_out(content)
+
+
+def slugify(value):
+    import unicodedata
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
+    value = unicode(re.sub('[^\w\s-]', '', value).strip().lower())
+    value = unicode(re.sub('[-\s]+', '-', value))
+    return value
+
+
+def filter_file_name(name):
+    illegal = ['NUL', '\',''//', ':', '*', '"', '<', '>', '|', '?', 'ï¼Ÿ']
+    for i in illegal:
+        name = name.replace(i, '')
+    return name
 
 HOST_NET_EASE = "https://api.imjad.cn/cloudmusic"
 API_PLAYLIST_DETAIL = ""
 # HOST_NET_EASE = "http://music.163.com/"
 # API_PLAYLIST_DETAIL = "/api/v3/playlist/detail"
 api_url = HOST_NET_EASE + API_PLAYLIST_DETAIL
-id = raw_input("ÇëÊäÈë¸èµ¥ id: ")
+id = r_in("è¯·è¾“å…¥æ­Œå• id: ")
 kwargs = {'id': id, 'type': 'playlist'}
 headers = {
     'method': "GET",
@@ -31,27 +63,32 @@ headers = {
 print "Start request..."
 request = requests.get(api_url, kwargs, headers=headers)
 # request = requests.get(api_url, kwargs)
-print "Request : %s" % request.url
-print "Request complete, %s" % request
+r_print("Request : %s" % request.url)
+r_print("Request complete, %s" % request)
 jsonResult = request.json()
-list_name = jsonResult['playlist']['name'].encode('gbk', 'ignore')
-print "¸èµ¥Ãû³Æ:{}".format(list_name)
-
+list_name = slugify(u"{}".format(jsonResult['playlist']['name']))
+# list_name = "{}".format(id)
+r_print("æ­Œå•åç§°:{}".format(list_name))
 
 # .encode('unicode_escape')
 
 
 def filter_img(item):
-    img_name = "{}_{}.{}".format(item['al']['name'].encode('gbk', 'ignore').replace('\\', '_').replace('/', '_'),
-                                 datetime.now().microsecond, item['al']['picUrl'].split('.')[-1])
+    name1 = "{}".format(item['al']['name'].encode('gbk', 'ignore')).replace('\\', '_').replace('/', '_')
+    # name1 = slugify(u"{}".format(name1))
+    name1 = filter_file_name(name1)
+    img_name = "{}_{}.{}".format(name1,
+                                 datetime.now().microsecond,
+                                 item['al']['picUrl'].split('.')[-1])
     return {'name': img_name, 'url': item['al']['picUrl']}
 
 
-# ´´½¨ÏÂÔØÎÄ¼ş¼Ğ
+# åˆ›å»ºä¸‹è½½æ–‡ä»¶å¤¹
 # user_name = getpass.getuser()
 # folderName = "C:\Users\{}\Downloads".format(user_name)
-# µ±Ç°Ä¿Â¼ÖĞÏÂÔØ
+# å½“å‰ç›®å½•ä¸­ä¸‹è½½
 dir_path = "download\{}_{}".format(list_name, datetime.now().microsecond)
+r_print("download path: " + dir_path)
 if not os.path.exists(dir_path):
     os.makedirs(dir_path)
 
@@ -63,12 +100,13 @@ downloaded = 0
 for img_bean in img_beans:
     if downloaded >= total:
         break
+    print "img name: " + img_bean['name']
     file_name = img_bean['name']
     file_url = img_bean['url']
     print "Downloading {}/{} : {}".format(downloaded + 1, total, file_name)
     print "Url: {}".format(file_url)
     urllib.urlretrieve(file_url, "{}\{}".format(dir_path, file_name))
     downloaded += 1
-print "ÏÂÔØÍê³É{}/{}!\nÒÑ±£´æÔÚ\{}".format(total, downloaded, dir_path)
+r_print("ä¸‹è½½å®Œæˆ{}/{}!\nå·²ä¿å­˜åœ¨\{}".format(total, downloaded, dir_path))
 to_open_path = "{}\{}".format(os.getcwd(), dir_path)
 subprocess.Popen(r'explorer /select, {}'.format(to_open_path))
