@@ -59,7 +59,7 @@ index = int(index_str)
 mag_id = result_magazines[index]['magId']
 # 从服务器拿到的 utf8 数据, 解码 decode 后使用
 mag_name = result_magazines[index]['magName'].decode('utf8', 'ignore').replace('\\', '_').replace('/', '_')
-r_print("要下载的杂志: {}".format(mag_id))
+r_print("To download mag id: {}".format(mag_id))
 
 # endregion
 
@@ -112,7 +112,7 @@ for img_url in img_urls:
 
     urllib.urlretrieve(final_url, u"{}\{}".format(dir_path, file_name))
     downloaded += 1
-r_print(u"下载完成{}/{}!\n已保存在\{}".format(downloaded, total, dir_path))
+r_print(u"Download finished {}/{}!\nSaved at\{}".format(downloaded, total, dir_path))
 to_open_path = "{}\{}".format(os.getcwd(), dir_path)
-r_print("打开:{}".format(to_open_path))
+r_print("Open:{}".format(to_open_path))
 subprocess.Popen(u'explorer /select, {}'.format(to_open_path).encode(locale.getpreferredencoding()), shell=True)

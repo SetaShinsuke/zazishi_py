@@ -68,7 +68,7 @@ r_print("Request complete, %s" % request)
 jsonResult = request.json()
 list_name = slugify(u"{}".format(jsonResult['playlist']['name']))
 # list_name = "{}".format(id)
-r_print("歌单名称:{}".format(list_name))
+r_print("List name:{}".format(list_name))
 
 # .encode('unicode_escape')
 
@@ -77,10 +77,16 @@ def filter_img(item):
     name1 = "{}".format(item['al']['name'].encode('gbk', 'ignore')).replace('\\', '_').replace('/', '_')
     # name1 = slugify(u"{}".format(name1))
     name1 = filter_file_name(name1)
+    if item['al'] is None or item['al']['picUrl'] is None or item['al']['picUrl'].split('.').__len__() <= 0:
+        return None
     img_name = "{}_{}.{}".format(name1,
                                  datetime.now().microsecond,
                                  item['al']['picUrl'].split('.')[-1])
     return {'name': img_name, 'url': item['al']['picUrl']}
+
+
+def filter_none(item):
+    return item is not None
 
 
 # 创建下载文件夹
@@ -93,6 +99,7 @@ if not os.path.exists(dir_path):
     os.makedirs(dir_path)
 
 img_beans = map(filter_img, jsonResult['playlist']['tracks'])
+img_beans = filter(filter_none, img_beans)
 total = len(img_beans)
 print 'total: {}'.format(total)
 downloaded = 0
@@ -107,6 +114,6 @@ for img_bean in img_beans:
     print "Url: {}".format(file_url)
     urllib.urlretrieve(file_url, "{}\{}".format(dir_path, file_name))
     downloaded += 1
-r_print("下载完成{}/{}!\n已保存在\{}".format(total, downloaded, dir_path))
+r_print("Download finished {}/{}!\nSaved at \{}".format(total, downloaded, dir_path))
 to_open_path = "{}\{}".format(os.getcwd(), dir_path)
 subprocess.Popen(r'explorer /select, {}'.format(to_open_path))
