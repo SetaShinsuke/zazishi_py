@@ -6,6 +6,7 @@ import subprocess
 import sys
 import urllib
 from datetime import datetime
+import chardet
 
 import requests
 
@@ -88,9 +89,10 @@ if not os.path.exists(dir_path):
 img_urls = map(filter_img, detail_json['content'])
 total = len(img_urls)
 downloaded = 0
-max = total
+max_amount = total
+# max_amount = 5
 for img_url in img_urls:
-    if downloaded >= max:
+    if downloaded >= max_amount:
         break
     file_name = img_url.split('/')[-1].replace('\\', '_').replace('/', '_')
     # file_name = img_url.split('/')[-1].encode('gbk', 'ignore').replace('\\', '_').replace('/', '_')
@@ -112,7 +114,11 @@ for img_url in img_urls:
 
     urllib.urlretrieve(final_url, u"{}\{}".format(dir_path, file_name))
     downloaded += 1
-r_print(u"Download finished {}/{}!\nSaved at\{}".format(downloaded, total, dir_path))
+r_print(u"Download finished {}/{}!\nSaved at \{}".format(downloaded, total, dir_path))
+# print unicode(dir_path)
+# 查看字符串的 encoding
+print chardet.detect("{}".format(dir_path))
+print chardet.detect("测试")
 to_open_path = "{}\{}".format(os.getcwd(), dir_path)
-r_print("Open:{}".format(to_open_path))
+r_print(u"Open:{}".format(to_open_path))
 subprocess.Popen(u'explorer /select, {}'.format(to_open_path).encode(locale.getpreferredencoding()), shell=True)
