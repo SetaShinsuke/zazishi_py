@@ -12,6 +12,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 # http://music.163.com/api/v3/playlist/detail?id=512808550
+# API 原文: https://zhuanlan.zhihu.com/p/30246788
 
 
 def r_in(hint):
