@@ -1,3 +1,12 @@
+# 安装 pip
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python get-pip.py
+添加系统变量
+
+# 安装 pyinstaller
+pip install pyinstaller
+
+# 说明
 pyinstaller [opts] yourprogram.py 
 参数含义
 
