@@ -15,8 +15,10 @@ sys.setdefaultencoding('utf-8')
 
 # 搜索 GET: https://app160501.zazhimi.net/api/search.php?k=men
 # 详情 POST: https://app160501.zazhimi.net/api/show.php HTTP/1.1
-
-HOST = "https://app160501.zazhimi.net/"
+# 
+# HOST = "https://app130.zazhimi.net/"
+HOST = "https://app2020.zazhimi.net/"
+# HOST = "http://120.26.56.13/.zazhimi.net/"
 API_INDEX = "/api/index.php"
 API_SEARCH = "/api/search.php"
 API_SHOW = "/api/show.php"
