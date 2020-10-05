@@ -6,12 +6,12 @@ import subprocess
 import sys
 import urllib
 from datetime import datetime
-import chardet
+# import chardet
 
 import requests
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
+# reload(sys)
+# sys.setdefaultencoding('utf-8')
 
 # 搜索 GET: https://app160501.zazhimi.net/api/search.php?k=men
 # 详情 POST: https://app160501.zazhimi.net/api/show.php HTTP/1.1
@@ -25,33 +25,35 @@ API_SHOW = "/api/show.php"
 
 
 def r_in(hint):
-    return raw_input(hint.encode(sys.stdin.encoding))
+    # return raw_input(hint.encode(sys.stdin.encoding))
+    return input(hint)
 
 
 def r_out(content):
-    return content.encode(sys.stdout.encoding)
+    # return content.encode(sys.stdout.encoding)
+    return content
 
 
 def r_print(content):
-    print r_out(content)
+    print(r_out(content))
 
 
-def slugify(value):
-    import unicodedata
-    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
-    value = unicode(re.sub('[^\w\s-]', '', value).strip().lower())
-    value = unicode(re.sub('[-\s]+', '-', value))
+# def slugify(value):
+#     import unicodedata
+#     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
+#     value = unicode(re.sub('[^\w\s-]', '', value).strip().lower())
+#     value = unicode(re.sub('[-\s]+', '-', value))
 
 # region 搜索要下载的杂志
 search_url = HOST + API_SEARCH
 api_url = HOST + API_SHOW
 id = r_in("搜索关键词: ")
 search_args = {'k': id}
-print "Start request..."
+print("Start request...")
 request_search = requests.get(search_url, search_args)
 
-print "Search Request : %s" % request_search.url
-print "Search complete, %s" % request_search
+print("Search Request : %s" % request_search.url)
+print("Search complete, %s" % request_search)
 search_result = request_search.json()
 result_magazines = search_result['magazine']
 for index, magazine in enumerate(result_magazines):
@@ -61,7 +63,7 @@ index_str = r_in("要下载的序号: ")
 index = int(index_str)
 mag_id = result_magazines[index]['magId']
 # 从服务器拿到的 utf8 数据, 解码 decode 后使用
-mag_name = result_magazines[index]['magName'].decode('utf8', 'ignore').replace('\\', '_').replace('/', '_')
+mag_name = result_magazines[index]['magName'].replace('\\', '_').replace('/', '_')
 r_print("To download mag id: {}".format(mag_id))
 
 # endregion
@@ -69,10 +71,10 @@ r_print("To download mag id: {}".format(mag_id))
 # region 拉取图片信息
 detail_url = HOST + API_SHOW
 detail_args = {'a': mag_id}
-print "Start request..."
+print("Start request...")
 request_show = requests.get(detail_url, detail_args)
 
-print "Search Request : %s" % request_show.url
+print("Search Request : %s" % request_show.url)
 detail_json = request_show.json()
 
 
@@ -88,18 +90,19 @@ dir_path = u"download\{}_{}".format(mag_name, datetime.now().microsecond)
 if not os.path.exists(dir_path):
     os.makedirs(dir_path)
 
-img_urls = map(filter_img, detail_json['content'])
+img_urls = list(map(filter_img, detail_json['content']))
 total = len(img_urls)
 downloaded = 0
 max_amount = total
-# max_amount = 5
+max_amount = 5
 for img_url in img_urls:
     if downloaded >= max_amount:
         break
     file_name = img_url.split('/')[-1].replace('\\', '_').replace('/', '_')
     # file_name = img_url.split('/')[-1].encode('gbk', 'ignore').replace('\\', '_').replace('/', '_')
     r_print("Downloading {}/{} : {}".format(downloaded + 1, total, file_name))
-    final_url = img_url.encode('utf8')
+    # final_url = img_url.encode('utf8')
+    final_url = img_url
 
     # p = urlparse.urlparse(img_url)
     # # final_url = "{}://{}/{}?{}".format(p.scheme, p.hostname,
@@ -114,13 +117,13 @@ for img_url in img_urls:
     # resp = requests.get(final_url)
     # print resp
 
-    urllib.urlretrieve(final_url, u"{}\{}".format(dir_path, file_name))
+    urllib.request.urlretrieve(final_url, u"{}\{}".format(dir_path, file_name))
     downloaded += 1
 r_print(u"Download finished {}/{}!\nSaved at \{}".format(downloaded, total, dir_path))
 # print unicode(dir_path)
 # 查看字符串的 encoding
-print chardet.detect("{}".format(dir_path))
-print chardet.detect("测试")
+# print(chardet.detect("{}".format(dir_path)))
+# print(chardet.detect("测试"))
 to_open_path = "{}\{}".format(os.getcwd(), dir_path)
 r_print(u"Open:{}".format(to_open_path))
-subprocess.Popen(u'explorer /select, {}'.format(to_open_path).encode(locale.getpreferredencoding()), shell=True)
+subprocess.Popen('explorer /select, {}'.format(to_open_path), shell=True)
