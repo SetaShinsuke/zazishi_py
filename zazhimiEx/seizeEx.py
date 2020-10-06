@@ -4,7 +4,8 @@ import os
 import re
 import subprocess
 import sys
-import urllib
+import urllib.request
+import urllib.parse
 from datetime import datetime
 # import chardet
 
@@ -48,7 +49,8 @@ def r_print(content):
 search_url = HOST + API_SEARCH
 api_url = HOST + API_SHOW
 id = r_in("搜索关键词: ")
-search_args = {'k': id}
+id_k = urllib.parse.quote(id.encode('gb2312'))
+search_args = {'k': id_k}
 print("Start request...")
 request_search = requests.get(search_url, search_args)
 
@@ -86,7 +88,7 @@ def filter_img(item):
 
 
 # 当前目录中下载
-dir_path = u"download\{}_{}".format(mag_name, datetime.now().microsecond)
+dir_path = "download\{}_{}".format(mag_name, datetime.now().microsecond)
 if not os.path.exists(dir_path):
     os.makedirs(dir_path)
 
@@ -94,7 +96,7 @@ img_urls = list(map(filter_img, detail_json['content']))
 total = len(img_urls)
 downloaded = 0
 max_amount = total
-max_amount = 5
+# max_amount = 3
 for img_url in img_urls:
     if downloaded >= max_amount:
         break
@@ -102,7 +104,9 @@ for img_url in img_urls:
     # file_name = img_url.split('/')[-1].encode('gbk', 'ignore').replace('\\', '_').replace('/', '_')
     r_print("Downloading {}/{} : {}".format(downloaded + 1, total, file_name))
     # final_url = img_url.encode('utf8')
-    final_url = img_url
+    url_tail = img_url.split('//')[-1]
+    final_url = img_url.replace(url_tail, urllib.parse.quote(url_tail.encode('gb2312')))
+    print("Pic url: {}".format(final_url))
 
     # p = urlparse.urlparse(img_url)
     # # final_url = "{}://{}/{}?{}".format(p.scheme, p.hostname,
@@ -117,13 +121,13 @@ for img_url in img_urls:
     # resp = requests.get(final_url)
     # print resp
 
-    urllib.request.urlretrieve(final_url, u"{}\{}".format(dir_path, file_name))
+    urllib.request.urlretrieve(final_url, "{}\{}".format(dir_path, file_name))
     downloaded += 1
-r_print(u"Download finished {}/{}!\nSaved at \{}".format(downloaded, total, dir_path))
+r_print("Download finished {}/{}!\nSaved at \{}".format(downloaded, total, dir_path))
 # print unicode(dir_path)
 # 查看字符串的 encoding
 # print(chardet.detect("{}".format(dir_path)))
 # print(chardet.detect("测试"))
 to_open_path = "{}\{}".format(os.getcwd(), dir_path)
-r_print(u"Open:{}".format(to_open_path))
+r_print("Open:{}".format(to_open_path))
 subprocess.Popen('explorer /select, {}'.format(to_open_path), shell=True)
